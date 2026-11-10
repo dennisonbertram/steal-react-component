@@ -2,7 +2,7 @@
 
 A Claude Code skill suite that extracts React components, design systems, and whole sites from live production websites, using browser automation.
 
-**Status:** working skill suite, published for use. The repo is prompt and skill files plus project templates. It has no test suite and records no benchmark or accuracy results.
+**Status:** published for use. The repo is prompt and skill files plus project templates. It has no test suite and records no benchmark or accuracy results, so treat the workflows as untested here. `copy-site` also expects a `frontend-developer` subagent (`COPY-SITE-AGENT.md`), which this repo does not provide.
 
 ## What it does
 
@@ -12,12 +12,14 @@ A Claude Code skill suite that extracts React components, design systems, and wh
 | `css-extractor` | (see `CSS-EXTRACTOR.md`) | Extracts a design system: CSS variables, typography, colors, spacing. Can emit a Tailwind config. |
 | `copy-site` | `/copy-site https://example.com` | Clones a whole site: screenshots it, extracts styles and components, de-minifies them with parallel subagents, scaffolds a Next.js project, and checks the result against the original. |
 
+`AGENT.md` also includes a Visual Navigator, an in-page UI for browsing components, hovering to highlight them, and copying the selected one.
+
 The technique comes from [fant.io/react](https://fant.io/react/), "How to Steal Any React Component".
 
 ## Requirements
 
 - Claude Code started with `claude --chrome`
-- Chrome with the [Claude-in-Chrome](https://github.com/anthropics/claude-in-chrome) extension
+- Chrome with the Claude-in-Chrome extension (see the [Claude Code Chrome docs](https://code.claude.com/docs/en/chrome))
 - A target site. React sites work best; style extraction works on any site.
 
 ## Install
@@ -26,6 +28,7 @@ Each skill is split into a short dispatcher (the skill) and a longer agent file.
 
 ```bash
 # Agents (required). Use .claude/agents/ instead for project-level install.
+mkdir -p ~/.claude/agents
 cp AGENT.md ~/.claude/agents/steal-react-component.md
 cp COPY-SITE-AGENT.md ~/.claude/agents/copy-site.md
 
@@ -33,7 +36,7 @@ cp COPY-SITE-AGENT.md ~/.claude/agents/copy-site.md
 mkdir -p ~/.claude/skills/steal-react-component
 cp SKILL.md CSS-EXTRACTOR.md COPY-SITE.md ~/.claude/skills/steal-react-component/
 
-# Optional: also expose copy-site as a slash command
+# Required for /copy-site: register it as a slash command
 mkdir -p ~/.claude/commands
 cp COPY-SITE.md ~/.claude/commands/copy-site.md
 ```
@@ -66,7 +69,7 @@ Then run `/steal-react-component https://example.com` or `/copy-site https://exa
 2. The agent injects `ReactStealer` into the page and reads each component's type, props, hooks, and rendered HTML.
 3. `StyleStealer` pulls CSS variables, computed styles, and typography.
 4. Several prop-to-HTML examples per component, plus the minified source, are given to the LLM to reconstruct the component.
-5. For `copy-site`, the result is scaffolded into a Next.js project and compared with the original until it matches.
+5. For `copy-site`, the result is scaffolded into a Next.js project and screenshot-compared with the original.
 
 ### Subagent architecture
 
@@ -80,6 +83,8 @@ Approximate token sizes. These are the author's estimates, not measurements reco
 The author's estimate for a typical site clone is about 6k tokens in the main agent and about 50k inside the subagent.
 
 ### Console API
+
+Inject `ReactStealer` (script in `AGENT.md`) and `StyleStealer` (script in `CSS-EXTRACTOR.md`) into the page first, then:
 
 ```javascript
 ReactStealer.summary()                 // list components and counts
