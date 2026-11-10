@@ -70,7 +70,7 @@ Then run `/steal-react-component https://example.com` or `/copy-site https://exa
 
 ### Subagent architecture
 
-The README previously reported approximate token sizes. These are estimates, not measurements recorded in the repo.
+Approximate token sizes. These are the author's estimates, not measurements recorded in the repo.
 
 | Skill | Dispatcher | Agent |
 |-------|------------|-------|
